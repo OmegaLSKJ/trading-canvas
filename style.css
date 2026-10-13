@@ -45,6 +45,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
   background-color: var(--bg-canvas);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: var(--text-primary);
@@ -2159,3 +2160,57 @@ body.panning-cursor, body.panning-cursor * {
 }
 
 
+
+/* Mac, tablet, and touch navigation */
+.stock-frame, .pinescript-frame, .sticky-note-frame {
+  /* Keep native text scrolling while reserving pinch for the board. */
+  touch-action: pan-x pan-y;
+}
+#bg-canvas, .canvas-section, .frame-header, .pine-header, .sticky-header, .section-header-tag,
+.resize-handle, .section-resize-handle, .port-input, .port-output,
+#minimap-canvas, .stock-frame canvas {
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+input, textarea, [contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+button, select, summary { touch-action: manipulation; }
+button:focus-visible, summary:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.tool-btn[aria-pressed="true"] { color: var(--accent); background: var(--panel-active); }
+.canvas-hints { pointer-events: auto; z-index: 20; max-width: min(420px, calc(100vw - 28px)); bottom: 76px; left: 50%; transform: translateX(-50%); opacity: 1; }
+.canvas-hints summary { cursor: pointer; padding: 6px 0; }
+.canvas-hints p { margin-top: 8px; line-height: 1.5; }
+.figma-header { top: max(14px, env(safe-area-inset-top)); gap: 12px; }
+.header-left-group { display: flex; align-items: center; gap: 6px; pointer-events: auto; }
+.figma-toolbar { bottom: max(16px, env(safe-area-inset-bottom)); }
+.figma-sidebar { max-height: calc(100dvh - 160px); }
+.stock-modal { max-height: calc(100dvh - 48px); max-width: calc(100vw - 24px); }
+@media (max-width: 1400px) {
+  .header-center-info { display: none; }
+  .header-actions { gap: 4px; }
+  .header-actions .primary-btn span, .header-actions .script-btn span,
+  .header-actions kbd { display: none; }
+}
+@media (max-width: 900px) {
+  .figma-header { flex-wrap: wrap; }
+  .header-left-group { flex-shrink: 0; }
+  .header-actions { max-width: 100%; overflow-x: auto; padding: 4px 0; }
+  .header-actions > * { flex-shrink: 0; }
+  .figma-sidebar { top: 112px; width: min(280px, calc(100vw - 28px)); bottom: 80px; }
+  .canvas-hints { display: block; bottom: 76px; font-size: 10px; }
+  .canvas-hints details:not([open]) { max-width: 220px; }
+}
+@media (pointer: coarse) {
+  .icon-btn, .tool-btn, .primary-btn, .script-btn, .sidebar-close-btn, .tf-btn { min-width: 44px; min-height: 44px; }
+  .resize-handle, .section-resize-handle { width: 30px; height: 30px; opacity: 1; }
+  .port-input::before, .port-output::before { content: ''; position: absolute; inset: -14px; }
+  .stock-frame .frame-header, .sticky-header, .section-header-tag { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

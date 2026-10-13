@@ -103,6 +103,26 @@ npm run start
 
 Open the printed QR code with Expo Go, or use `npm run android` / `npm run ios` with a connected device or emulator. Run `npm run web` to preview the layout in a browser. The app includes a touch-movable board, demo stock charts, editable Pine Script templates, and sticky notes. It currently uses sample market data, keeps edits for the current session only, and does not execute Pine Script.
 
+### Mac, trackpad, and touch controls
+
+On macOS, use the desktop app in Safari or Chrome, or run the Expo app with `npm run web`. Expo's native device targets are iOS and Android. The web canvas displays Command (`⌘`) and Option (`⌥`) shortcuts on Apple devices; the existing Ctrl shortcuts continue to work on other platforms.
+
+| Interaction | Desktop canvas | Expo app |
+| :--- | :--- | :--- |
+| Two-finger trackpad scroll | Pan in both directions, including over cards | Pan the board, including over cards |
+| Trackpad pinch | Zoom around the pointer; supports Safari GestureEvents | Zoom around the pointer in web mode |
+| One-finger drag on empty space | Pan in Auto or Hand mode; box-select in Select mode | Pan the board |
+| Two-finger drag / pinch on screen | Pan and zoom around the midpoint | Pan and zoom around the midpoint |
+| Double-tap empty space | Toggle between overview and 100% around the tap | Toggle between 100% and 200% around the tap |
+| Drag a card | Drag its header; selected unlocked cards move together | Drag the dedicated grip; movement accounts for zoom |
+| Drag a resize corner | Resize charts, scripts, sections, and notes | Cards use a fixed readable width |
+| Long-press | Add a frame to the current selection | Select a card using its grip |
+| Drag a connector / minimap | Connect frames / navigate with mouse, pen, or touch | Use the board and Layers navigation |
+
+The desktop's floating toolbar provides Auto, Select, and Hand modes and a collapsible gesture guide. Hold Space to pan with a mouse; use `⌘Z` / `⌘⇧Z` for undo / redo, `⌘C` / `⌘V` / `⌘D` for copy / paste / duplicate, and `⌥L` / `⌥R` for sidebars. On either web app, use `⌘+`, `⌘−`, and `⌘0` for zoom and reset (focus the Expo board first). Text editors retain their own scrolling, selection, and undo behavior.
+
+The Expo board also has visible zoom, reset, and help buttons. Panels scroll on small screens, larger screens use a centered asset picker, and safe-area insets keep controls clear of device status bars and home indicators. Pinching takes over from card dragging without moving the card under the remaining finger. Browser and operating-system gestures such as Mission Control and desktop switching remain controlled by macOS.
+
 ---
 
 ## 📜 License

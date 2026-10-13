@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Trading Canvas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -309,6 +309,10 @@
     <!-- Figma-style Floating Bottom Zoom Toolbar -->
     <div class="figma-toolbar">
       <div class="toolbar-pill">
+        <button class="tool-btn" data-canvas-mode="auto" aria-pressed="true" title="Automatic: mouse selects, touch pans" aria-label="Automatic canvas mode">↖</button>
+        <button class="tool-btn" data-canvas-mode="select" aria-pressed="false" title="Select: drag empty canvas to select frames" aria-label="Select canvas mode">⬚</button>
+        <button class="tool-btn" data-canvas-mode="pan" aria-pressed="false" title="Hand: drag to pan the canvas" aria-label="Pan canvas mode">✋</button>
+        <div class="toolbar-divider"></div>
         <button class="tool-btn" id="btn-zoom-out" title="Zoom Out (Ctrl + Minus)" aria-label="Zoom out">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <line x1="5" y1="12" x2="19" y2="12"/>
@@ -339,10 +343,18 @@
 
     <!-- Quick navigation hint -->
     <div class="canvas-hints" id="canvas-hints">
-      <span>Drag Canvas or Hold <kbd>Space</kbd> &bull; Press <kbd>C</kbd> to Add Stock Chart &bull; Drag Chart Frames to Move</span>
+      <details>
+        <summary>Trackpad &amp; touch controls</summary>
+        <p>Two-finger scroll to pan · Pinch to zoom</p>
+        <p>Touch: drag blank canvas to pan · Double-tap to zoom</p>
+        <p>Drag headers to move · Drag corners to resize</p>
+        <p>Hold a frame to add to selection · Use Select for box selection</p>
+        <p><kbd>Space</kbd> + drag to pan · <kbd>C</kbd> to add a chart</p>
+      </details>
     </div>
   </div>
 
+  <script src="canvas-input.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

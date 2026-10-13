@@ -438,8 +438,8 @@ class StockChartFrame {
   }
 
   setupEvents() {
-    this.element.addEventListener('mousedown', (e) => {
-      if (e.button === 1) return; // Allow middle-click (scroller) to pan canvas
+    this.element.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || this.app.isSpacePressed || (e.ctrlKey && this.app.input.isMac)) return; // Allow middle-click (scroller) to pan canvas
       e.stopPropagation();
       if (!this.app.selectedFrames.has(this)) {
         this.app.selectFrame(this, e.shiftKey);
@@ -447,8 +447,9 @@ class StockChartFrame {
     });
 
     // Move frame (with multi-selection drag support)
-    this.header.addEventListener('mousedown', (e) => {
-      if (e.button === 1) return; // Allow middle-click (scroller) to pan canvas
+    this.header.addEventListener('pointerdown', (e) => {
+      if (this.isLocked || e.target.closest('button, input, select, .sticky-color-dot')) return;
+      if (e.button !== 0 || this.app.isSpacePressed || (e.ctrlKey && this.app.input.isMac)) return; // Allow middle-click (scroller) to pan canvas
       if (e.target.closest('button')) return;
       e.stopPropagation();
       e.preventDefault();
@@ -459,7 +460,7 @@ class StockChartFrame {
 
       const startMouseX = e.clientX;
       const startMouseY = e.clientY;
-      const framesToMove = Array.from(this.app.selectedFrames).map(f => ({
+      const framesToMove = Array.from(this.app.selectedFrames).filter(f => !f.isLocked).map(f => ({
         frame: f,
         startX: f.x,
         startY: f.y
@@ -477,17 +478,12 @@ class StockChartFrame {
         this.app.updateWires();
       };
 
-      const onMouseUp = () => {
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
-      };
-
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
+      this.app.input.trackDrag(e, onMouseMove);
     });
 
     // Resize Frame
-    this.resizeHandle.addEventListener('mousedown', (e) => {
+    this.resizeHandle.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || this.isLocked) return;
       e.stopPropagation();
       e.preventDefault();
 
@@ -507,13 +503,7 @@ class StockChartFrame {
         this.app.updateWires();
       };
 
-      const onResizeUp = () => {
-        window.removeEventListener('mousemove', onResizeMove);
-        window.removeEventListener('mouseup', onResizeUp);
-      };
-
-      window.addEventListener('mousemove', onResizeMove);
-      window.addEventListener('mouseup', onResizeUp);
+      this.app.input.trackDrag(e, onResizeMove);
     });
 
     // Timeframe click
@@ -549,21 +539,22 @@ class StockChartFrame {
 
     // Connector Input Ports (All 4 Sides)
     this.inputPorts.forEach(pin => {
-      pin.addEventListener('mousedown', (e) => {
+      pin.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0 || this.isLocked) return;
         e.stopPropagation();
         this.app.startWireDrag(this, 'input', e, pin.dataset.side);
       });
     });
 
     // Canvas crosshair hover
-    this.canvas.addEventListener('mousemove', (e) => {
+    this.canvas.addEventListener('pointermove', (e) => {
       const rect = this.canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
+      const mouseX = (e.clientX - rect.left) / this.app.zoom;
+      const mouseY = (e.clientY - rect.top) / this.app.zoom;
       this.handleHover(mouseX, mouseY);
     });
 
-    this.canvas.addEventListener('mouseleave', () => {
+    this.canvas.addEventListener('pointerleave', () => {
       this.hoverIndex = null;
       this.tooltip.style.display = 'none';
       this.renderChart();
@@ -1106,8 +1097,8 @@ class PineScriptFrame {
   }
 
   setupEvents() {
-    this.element.addEventListener('mousedown', (e) => {
-      if (e.button === 1) return; // Allow middle-click (scroller) to pan canvas
+    this.element.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || this.app.isSpacePressed || (e.ctrlKey && this.app.input.isMac)) return; // Allow middle-click (scroller) to pan canvas
       e.stopPropagation();
       if (!this.app.selectedFrames.has(this)) {
         this.app.selectFrame(this, e.shiftKey);
@@ -1115,8 +1106,9 @@ class PineScriptFrame {
     });
 
     // Move frame (with multi-selection drag support)
-    this.header.addEventListener('mousedown', (e) => {
-      if (e.button === 1) return; // Allow middle-click (scroller) to pan canvas
+    this.header.addEventListener('pointerdown', (e) => {
+      if (this.isLocked || e.target.closest('button, input, select, .sticky-color-dot')) return;
+      if (e.button !== 0 || this.app.isSpacePressed || (e.ctrlKey && this.app.input.isMac)) return; // Allow middle-click (scroller) to pan canvas
       if (e.target.closest('button') || e.target.closest('select')) return;
       e.stopPropagation();
       e.preventDefault();
@@ -1127,7 +1119,7 @@ class PineScriptFrame {
 
       const startMouseX = e.clientX;
       const startMouseY = e.clientY;
-      const framesToMove = Array.from(this.app.selectedFrames).map(f => ({
+      const framesToMove = Array.from(this.app.selectedFrames).filter(f => !f.isLocked).map(f => ({
         frame: f,
         startX: f.x,
         startY: f.y
@@ -1145,17 +1137,12 @@ class PineScriptFrame {
         this.app.updateWires();
       };
 
-      const onMouseUp = () => {
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
-      };
-
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
+      this.app.input.trackDrag(e, onMouseMove);
     });
 
     // Resize Frame
-    this.resizeHandle.addEventListener('mousedown', (e) => {
+    this.resizeHandle.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || this.isLocked) return;
       e.stopPropagation();
       e.preventDefault();
 
@@ -1174,13 +1161,7 @@ class PineScriptFrame {
         this.app.updateWires();
       };
 
-      const onResizeUp = () => {
-        window.removeEventListener('mousemove', onResizeMove);
-        window.removeEventListener('mouseup', onResizeUp);
-      };
-
-      window.addEventListener('mousemove', onResizeMove);
-      window.addEventListener('mouseup', onResizeUp);
+      this.app.input.trackDrag(e, onResizeMove);
     });
 
     // Editor inputs & line numbers
@@ -1227,7 +1208,8 @@ class PineScriptFrame {
 
     // 4 Output Ports Mouse Down (Drag Connector Wire from specific node)
     this.outputPorts.forEach((portEl, idx) => {
-      portEl.addEventListener('mousedown', (e) => {
+      portEl.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0 || this.isLocked) return;
         e.stopPropagation();
         this.app.startWireDrag(this, 'output', e, idx);
       });
@@ -1472,15 +1454,15 @@ class CanvasSectionFrame {
   }
 
   setupEvents() {
-    this.titleInput.addEventListener('mousedown', (e) => e.stopPropagation());
+    this.titleInput.addEventListener('pointerdown', (e) => e.stopPropagation());
     this.titleInput.addEventListener('input', (e) => {
       this.title = e.target.value.trim() || 'Section';
       this.app.updateLayersTree();
       this.app.updateInspector();
     });
 
-    this.element.addEventListener('mousedown', (e) => {
-      if (e.button === 1) return; // Allow middle-click panning
+    this.element.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || this.app.isSpacePressed || (e.ctrlKey && this.app.input.isMac)) return; // Allow middle-click panning
       e.stopPropagation();
       if (!this.app.selectedFrames.has(this)) {
         this.app.selectFrame(this, e.shiftKey);
@@ -1488,12 +1470,14 @@ class CanvasSectionFrame {
     });
 
     // Move Section and all contained frames seamlessly
-    this.header.addEventListener('mousedown', (e) => {
-      if (e.button !== 0 || this.isLocked) return;
+    this.header.addEventListener('pointerdown', (e) => {
+      if (this.isLocked || e.target.closest('button, input, select, .sticky-color-dot')) return;
+      if (e.button !== 0 || this.isLocked || this.app.isSpacePressed) return;
       e.stopPropagation();
+      if (!this.app.selectedFrames.has(this)) this.app.selectFrame(this, e.shiftKey);
 
       const contained = this.getContainedFrames();
-      const framesToMove = new Set([this, ...contained]);
+      const framesToMove = new Set([this, ...contained.filter(f => !f.isLocked)]);
       const initialPositions = new Map();
       framesToMove.forEach(f => {
         initialPositions.set(f, { x: f.x, y: f.y });
@@ -1520,19 +1504,15 @@ class CanvasSectionFrame {
       };
 
       const onMouseUp = () => {
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
         this.updateContainedBadge();
-        this.app.pushHistory('Move Section');
       };
 
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
+      this.app.input.trackDrag(e, onMouseMove, onMouseUp);
     });
 
     // Corner Resizing
-    this.resizeHandle.addEventListener('mousedown', (e) => {
-      if (e.button !== 0 || this.isLocked) return;
+    this.resizeHandle.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || this.isLocked || this.app.isSpacePressed) return;
       e.stopPropagation();
       const startW = this.width;
       const startH = this.height;
@@ -1552,13 +1532,10 @@ class CanvasSectionFrame {
       };
 
       const onMouseUp = () => {
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
-        this.app.pushHistory('Resize Section');
+
       };
 
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
+      this.app.input.trackDrag(e, onMouseMove, onMouseUp);
     });
   }
 
@@ -1656,8 +1633,8 @@ class StickyNoteFrame {
   }
 
   setupEvents() {
-    this.element.addEventListener('mousedown', (e) => {
-      if (e.button === 1) return; // Allow middle-click panning
+    this.element.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || this.app.isSpacePressed || (e.ctrlKey && this.app.input.isMac)) return; // Allow middle-click panning
       e.stopPropagation();
       if (!this.app.selectedFrames.has(this)) {
         this.app.selectFrame(this, e.shiftKey);
@@ -1681,10 +1658,12 @@ class StickyNoteFrame {
     });
 
     // Drag header to move
-    this.header.addEventListener('mousedown', (e) => {
-      if (e.button !== 0 || this.isLocked) return;
+    this.header.addEventListener('pointerdown', (e) => {
+      if (this.isLocked || e.target.closest('button, input, select, .sticky-color-dot')) return;
+      if (e.button !== 0 || this.isLocked || this.app.isSpacePressed) return;
       e.stopPropagation();
-      const framesToMove = this.app.selectedFrames.has(this) ? Array.from(this.app.selectedFrames) : [this];
+      if (!this.app.selectedFrames.has(this)) this.app.selectFrame(this, e.shiftKey);
+      const framesToMove = this.app.selectedFrames.has(this) ? Array.from(this.app.selectedFrames).filter(f => !f.isLocked) : [this];
       const initialPositions = new Map();
       framesToMove.forEach(f => initialPositions.set(f, { x: f.x, y: f.y }));
       const startWorld = this.app.screenToWorld(e.clientX, e.clientY);
@@ -1706,18 +1685,15 @@ class StickyNoteFrame {
       };
 
       const onMouseUp = () => {
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
-        this.app.pushHistory('Move Note');
+
       };
 
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
+      this.app.input.trackDrag(e, onMouseMove, onMouseUp);
     });
 
     // Resize Note
-    this.resizeHandle.addEventListener('mousedown', (e) => {
-      if (e.button !== 0 || this.isLocked) return;
+    this.resizeHandle.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || this.isLocked || this.app.isSpacePressed) return;
       e.stopPropagation();
       const startW = this.width;
       const startH = this.height;
@@ -1736,13 +1712,10 @@ class StickyNoteFrame {
       };
 
       const onMouseUp = () => {
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
-        this.app.pushHistory('Resize Note');
+
       };
 
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
+      this.app.input.trackDrag(e, onMouseMove, onMouseUp);
     });
   }
 
@@ -1875,6 +1848,7 @@ class FigmaCanvasApp {
 
   init() {
     this.setupResize();
+    this.input = new CanvasInput(this);
     this.setupEventListeners();
     this.setupStockModal();
     this.setupLiveSimulation();
@@ -1887,6 +1861,11 @@ class FigmaCanvasApp {
     this.setupMinimap();
     this.setupHistoryManager();
     this.setupExportBoard();
+    if (window.matchMedia('(max-width: 900px)').matches) {
+      this.toggleLeftSidebar(false);
+      this.toggleRightSidebar(false);
+      this.toggleMinimap(false);
+    }
 
     // Initial Figma Section: grouping the trading diamond
     const initialSection = this.addSectionFrame(-920, -680, {
@@ -2007,11 +1986,11 @@ class FigmaCanvasApp {
     });
 
     // Middle-click (scroller click) anywhere on screen allows moving the canvas
-    window.addEventListener('mousedown', (e) => {
+    window.addEventListener('pointerdown', (e) => {
       // Track last clicked world position for cursor-targeted pasting
       this.lastClickedWorldPos = this.screenToWorld(e.clientX, e.clientY);
 
-      if (e.button === 1) {
+      if (e.button === 1 && this.input.isCanvasTarget(e.target)) {
         e.preventDefault();
         this.isDraggingCanvas = true;
         this.dragStart = { x: e.clientX, y: e.clientY };
@@ -2020,7 +1999,7 @@ class FigmaCanvasApp {
       }
     });
 
-    window.addEventListener('mousemove', (e) => {
+    window.addEventListener('pointermove', (e) => {
       const world = this.screenToWorld(e.clientX, e.clientY);
       this.mouseWorldPos = world;
       this.coordDisplay.textContent = `X: ${Math.round(world.x)}  Y: ${Math.round(world.y)}`;
@@ -2047,7 +2026,9 @@ class FigmaCanvasApp {
       }
     });
 
-    this.canvas.addEventListener('mousedown', (e) => {
+    this.canvas.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 && e.button !== 1) return;
+      if (e.ctrlKey && this.input.isMac) return;
       this.lastClickedWorldPos = this.screenToWorld(e.clientX, e.clientY);
 
       // Scroller (middle button) or space + left click pans canvas
@@ -2071,7 +2052,7 @@ class FigmaCanvasApp {
       }
     });
 
-    window.addEventListener('mouseup', (e) => {
+    window.addEventListener('pointerup', (e) => {
       if (this.isDraggingCanvas) {
         this.isDraggingCanvas = false;
         this.canvas.classList.remove('panning-active');
@@ -2090,27 +2071,15 @@ class FigmaCanvasApp {
       }
     });
 
-    window.addEventListener('wheel', (e) => {
-      if (!this.stockModalOverlay.classList.contains('hidden')) return;
-
-      if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        const factor = Math.exp(-e.deltaY * 0.0035);
-        this.setZoomAtPoint(this.zoom * factor, e.clientX, e.clientY);
-      } else {
-        if (e.target === this.canvas || e.target.id === 'app' || e.target.id === 'canvas-world') {
-          e.preventDefault();
-          this.pan.x -= e.deltaX;
-          this.pan.y -= e.deltaY;
-          this.updateTransform();
-          this.requestRender();
-        }
-      }
-    }, { passive: false });
-
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
-      const isInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
+      const isInput = this.input.isEditing(e.target);
+      if (e.isComposing) return;
+      if (e.target.closest('button, summary') && (e.key === ' ' || e.key === 'Enter')) return;
+      if (!this.stockModalOverlay.classList.contains('hidden')) {
+        if (e.key === 'Escape') this.closeStockModal();
+        return;
+      }
       if (isInput) {
         if (e.key === 'Escape') this.closeStockModal();
         return;
@@ -2188,13 +2157,13 @@ class FigmaCanvasApp {
       }
 
       // Alt+L toggles Left Layers sidebar
-      if (e.altKey && (e.key === 'l' || e.key === 'L')) {
+      if (e.altKey && e.code === 'KeyL') {
         e.preventDefault();
         this.toggleLeftSidebar();
       }
 
       // Alt+R toggles Right Design Inspector
-      if (e.altKey && (e.key === 'r' || e.key === 'R')) {
+      if (e.altKey && e.code === 'KeyR') {
         e.preventDefault();
         this.toggleRightSidebar();
       }
@@ -2223,6 +2192,7 @@ class FigmaCanvasApp {
       }
 
       if (e.key === 'Escape') {
+        this.input.reset();
         this.closeStockModal();
         this.deselectAll();
       }
@@ -2334,6 +2304,10 @@ class FigmaCanvasApp {
   // ==========================================
   // Frame Management & Selection (Figma Marquee Support)
   // ==========================================
+  updateTargetDropdowns() {
+    this.pineNodes.forEach(node => node.updateTargetDropdown());
+  }
+
   selectFrame(frame, multi = false) {
     if (!multi) {
       this.deselectAll();
@@ -3298,15 +3272,11 @@ class FigmaCanvasApp {
         }
       };
 
-      this.minimapCanvas.addEventListener('mousedown', (e) => {
+      this.minimapCanvas.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
         handleMinimapNav(e);
         const onMouseMove = (moveEvent) => handleMinimapNav(moveEvent);
-        const onMouseUp = () => {
-          window.removeEventListener('mousemove', onMouseMove);
-          window.removeEventListener('mouseup', onMouseUp);
-        };
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onMouseUp);
+        this.input.trackDrag(e, onMouseMove, undefined, false);
       });
     }
   }
