@@ -91,6 +91,18 @@ Using Node `npx serve`:
 npx -y serve .
 ```
 
+### React Native app (Expo)
+
+The mobile app lives in [`mobile/`](mobile/). Install its locked dependencies and start Expo:
+
+```bash
+cd mobile
+npm ci
+npm run start
+```
+
+Open the printed QR code with Expo Go, or use `npm run android` / `npm run ios` with a connected device or emulator. Run `npm run web` to preview the layout in a browser. The app includes a touch-movable board, demo stock charts, editable Pine Script templates, and sticky notes. It currently uses sample market data, keeps edits for the current session only, and does not execute Pine Script.
+
 ---
 
 ## 📜 License
